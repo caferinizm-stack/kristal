@@ -17,7 +17,7 @@
     <main class="page">
       <header class="head">
         <img class="logo" src="./assets/logo.png" alt="Retra Live" />
-        <div class="secure">🔒 iyzico güvenli ödeme</div>
+        <div class="secure">💎 Resmî kristal merkezi</div>
       </header>
 
       <div class="test-banner" id="test-banner" hidden>TEST MODU · gerçek kart çekilmez</div>
@@ -28,7 +28,7 @@
           <img src="./assets/kristal.png" alt="" class="hero-gem" />
           <div>
             <h1>Kristal Yükle</h1>
-            <p>ID'ni gir, paketini seç, kartınla öde. Kristal ödeme onaylandığı an hesabına geçer.</p>
+            <p>ID'ni gir, paketini seç, uygulamana gelen 5 haneli kodla onayla. Ücretsiz paketler anında hesabına geçer; kartla ödeme çok yakında.</p>
           </div>
         </div>
 
@@ -49,32 +49,65 @@
           <div class="hint" id="rid-hint">ID'ni uygulamada profil sayfanda görebilirsin.</div>
         </div>
 
-        <div class="card">
+        <div class="card" id="pack-card" hidden>
           <div class="step"><span>2</span> Kristal paketi</div>
           <div class="packs" id="packs"><div class="muted">Paketler yükleniyor…</div></div>
         </div>
 
-        <div class="card">
-          <div class="step"><span>3</span> Fatura bilgileri</div>
-          <label>Ad Soyad<input id="name" autocomplete="name" placeholder="Ad Soyad" maxlength="80" /></label>
-          <label>E-posta<input id="email" type="email" autocomplete="email" placeholder="ornek@mail.com" maxlength="120" /></label>
-          <label>Cep telefonu<input id="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="5xx xxx xx xx" maxlength="16" /></label>
-          <label class="check"><input type="checkbox" id="agree" />
-            <span>Kristallerin dijital ürün olduğunu, ödeme onaylanınca hesabıma hemen yükleneceğini ve <a href="#" id="terms-link">satış koşullarını</a> kabul ediyorum.</span></label>
+        <div class="card code-card" id="code-card" hidden>
+          <div class="step"><span>3</span> Uygulamadan gelen kod</div>
+          <div class="code-info">
+            <div class="code-ico">🔐</div>
+            <p><b id="code-who">Hesabına</b> uygulamada <b>Retra Payment Asistan</b> mesajıyla 5 haneli bir web aktarma kodu gönderdik. Kodu kopyalayıp buraya gir.</p>
+          </div>
+          <div class="otp" id="otp">
+            <input inputmode="numeric" maxlength="1" autocomplete="one-time-code" aria-label="1. hane" />
+            <input inputmode="numeric" maxlength="1" aria-label="2. hane" />
+            <input inputmode="numeric" maxlength="1" aria-label="3. hane" />
+            <input inputmode="numeric" maxlength="1" aria-label="4. hane" />
+            <input inputmode="numeric" maxlength="1" aria-label="5. hane" />
+          </div>
+          <div class="code-ok" id="code-ok" hidden>✓ Kod doğrulandı</div>
+          <div class="code-row">
+            <span class="hint" id="code-hint">Kod 10 dakika geçerli.</span>
+            <button class="link" id="code-resend" disabled>Yeni kod (60)</button>
+          </div>
         </div>
 
-        <p class="foot">Kart bilgilerin Retra'ya gelmez; ödeme iyzico'nun güvenli sayfasında yapılır.<span id="company"></span></p>
+        <p class="foot">Kristal yalnız önizlemede gördüğün ve kodu onaylayan hesaba yüklenir. Kodu kimseyle paylaşma.<span id="company"></span></p>
       </section>
 
-      <!-- Sonuç -->
+      <!-- Sonuç: 3D dekont -->
       <section id="result" hidden>
-        <div class="card result">
-          <div class="res-icon" id="res-icon">⏳</div>
-          <h2 id="res-title">Ödeme doğrulanıyor…</h2>
-          <p id="res-text">Bu birkaç saniye sürebilir, sayfayı kapatma.</p>
-          <div class="res-amount" id="res-amount" hidden><img src="./assets/kristal.png" alt="" /><b id="res-crystals"></b></div>
-          <button class="primary" id="res-again">Yeni yükleme yap</button>
+        <div class="done-title"><span class="spark">✨</span> Kristalin yüklendi!</div>
+        <div class="receipt-stage">
+          <div class="receipt" id="receipt">
+            <div class="rc-shine"></div>
+            <div class="rc-head">
+              <img src="./assets/logo.png" alt="Retra Live" class="rc-logo" />
+              <span class="rc-chip">DEKONT</span>
+            </div>
+            <div class="rc-amount">
+              <img src="./assets/kristal.png" alt="" />
+              <div>
+                <s id="rc-base" hidden></s>
+                <b id="rc-crystals">0</b>
+                <small>kristal yüklendi</small>
+              </div>
+            </div>
+            <div class="rc-bonus" id="rc-bonus" hidden></div>
+            <div class="rc-cut"><i></i></div>
+            <dl class="rc-rows">
+              <div><dt>Hesap</dt><dd id="rc-user"></dd></div>
+              <div><dt>Kaynak</dt><dd>Retra Web</dd></div>
+              <div><dt>Tutar</dt><dd id="rc-price">Ücretsiz</dd></div>
+              <div><dt>Tarih</dt><dd id="rc-date"></dd></div>
+              <div><dt>Dekont no</dt><dd id="rc-no"></dd></div>
+            </dl>
+            <div class="rc-foot">✓ İşlem başarılı · Dekont uygulamada Retra Payment Asistan mesajına da gönderildi</div>
+          </div>
         </div>
+        <button class="primary wide" id="res-again">Yeni yükleme yap</button>
       </section>
     </main>
 
@@ -84,13 +117,7 @@
         <small id="pay-label">Paket seç</small>
         <b id="pay-total">—</b>
       </div>
-      <button class="primary" id="pay-btn" disabled>Güvenli Öde</button>
-    </div>
-
-    <div class="sheet-back" id="terms-back" hidden></div>
-    <div class="sheet" id="terms" hidden>
-      <div class="sheet-head"><b>Satış koşulları</b><button id="terms-close">✕</button></div>
-      <div class="sheet-body" id="terms-body"></div>
+      <button class="primary" id="pay-btn" disabled>Devam et</button>
     </div>
 
     <div class="toast" id="toast" hidden></div>
