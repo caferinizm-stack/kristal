@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Retra Live · Kristal Yükle</title>
+    <meta name="description" content="Retra Live hesabına kredi kartıyla güvenle kristal yükle." />
+    <meta name="theme-color" content="#0a0716" />
+    <link rel="icon" type="image/png" href="./assets/kristal.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div class="glow g1"></div><div class="glow g2"></div>
+    <main class="page">
+      <header class="head">
+        <img class="logo" src="./assets/logo.png" alt="Retra Live" />
+        <div class="secure">🔒 iyzico güvenli ödeme</div>
+      </header>
+
+      <div class="test-banner" id="test-banner" hidden>TEST MODU · gerçek kart çekilmez</div>
+
+      <!-- Satın alma -->
+      <section id="shop">
+        <div class="hero">
+          <img src="./assets/kristal.png" alt="" class="hero-gem" />
+          <div>
+            <h1>Kristal Yükle</h1>
+            <p>ID'ni gir, paketini seç, kartınla öde. Kristal ödeme onaylandığı an hesabına geçer.</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="step"><span>1</span> Retra ID'n</div>
+          <div class="id-row">
+            <input id="rid" inputmode="numeric" autocomplete="off" placeholder="Örn. 1234567" maxlength="20" />
+            <button class="ghost" id="rid-btn">Bul</button>
+          </div>
+          <div class="who" id="who" hidden>
+            <div class="who-av" id="who-av"></div>
+            <div class="who-info">
+              <b id="who-name"></b>
+              <small id="who-id"></small>
+            </div>
+            <span class="who-ok">✓</span>
+          </div>
+          <div class="hint" id="rid-hint">ID'ni uygulamada profil sayfanda görebilirsin.</div>
+        </div>
+
+        <div class="card">
+          <div class="step"><span>2</span> Kristal paketi</div>
+          <div class="packs" id="packs"><div class="muted">Paketler yükleniyor…</div></div>
+        </div>
+
+        <div class="card">
+          <div class="step"><span>3</span> Fatura bilgileri</div>
+          <label>Ad Soyad<input id="name" autocomplete="name" placeholder="Ad Soyad" maxlength="80" /></label>
+          <label>E-posta<input id="email" type="email" autocomplete="email" placeholder="ornek@mail.com" maxlength="120" /></label>
+          <label>Cep telefonu<input id="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="5xx xxx xx xx" maxlength="16" /></label>
+          <label class="check"><input type="checkbox" id="agree" />
+            <span>Kristallerin dijital ürün olduğunu, ödeme onaylanınca hesabıma hemen yükleneceğini ve <a href="#" id="terms-link">satış koşullarını</a> kabul ediyorum.</span></label>
+        </div>
+
+        <p class="foot">Kart bilgilerin Retra'ya gelmez; ödeme iyzico'nun güvenli sayfasında yapılır.<span id="company"></span></p>
+      </section>
+
+      <!-- Sonuç -->
+      <section id="result" hidden>
+        <div class="card result">
+          <div class="res-icon" id="res-icon">⏳</div>
+          <h2 id="res-title">Ödeme doğrulanıyor…</h2>
+          <p id="res-text">Bu birkaç saniye sürebilir, sayfayı kapatma.</p>
+          <div class="res-amount" id="res-amount" hidden><img src="./assets/kristal.png" alt="" /><b id="res-crystals"></b></div>
+          <button class="primary" id="res-again">Yeni yükleme yap</button>
+        </div>
+      </section>
+    </main>
+
+    <!-- Alt ödeme çubuğu -->
+    <div class="pay-bar" id="pay-bar">
+      <div class="pay-sum">
+        <small id="pay-label">Paket seç</small>
+        <b id="pay-total">—</b>
+      </div>
+      <button class="primary" id="pay-btn" disabled>Güvenli Öde</button>
+    </div>
+
+    <div class="sheet-back" id="terms-back" hidden></div>
+    <div class="sheet" id="terms" hidden>
+      <div class="sheet-head"><b>Satış koşulları</b><button id="terms-close">✕</button></div>
+      <div class="sheet-body" id="terms-body"></div>
+    </div>
+
+    <div class="toast" id="toast" hidden></div>
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
