@@ -64,12 +64,16 @@ async function demo(name, a) {
   await new Promise((r) => setTimeout(r, 300));
   if (name === 'web_crystal_public') {
     return { enabled: true, payments: false, packages: [
-      { id: 'f1', crystals: 15000, base_crystals: 10000, price: 0, is_free: true, free_limit: 'once', badge: 'Hoş geldin' },
-      { id: 'f2', crystals: 500, base_crystals: 0, price: 0, is_free: true, free_limit: 'daily', badge: 'Günlük' },
-      { id: 'p1', crystals: 15000, base_crystals: 0, price: 147, is_free: false },
-      { id: 'p2', crystals: 130000, base_crystals: 100000, price: 980, is_free: false, badge: '+%30' },
-      { id: 'p3', crystals: 400000, base_crystals: 300000, price: 2940, is_free: false },
-      { id: 'p4', crystals: 1500000, base_crystals: 1000000, price: 9800, is_free: false, badge: 'En popüler' }] };
+      { id: 'f1', crystals: 15000, base_crystals: 10000, price: 0, is_free: true, max_claims: 50, left: 47, badge: 'Hoş geldin', bg_effect: 'fire', amount_effect: 'gold', price_effect: 'fire' },
+      { id: 'f2', crystals: 500, base_crystals: 0, price: 0, is_free: true, max_claims: 20, left: 0 },
+      { id: 'p1', crystals: 15000, base_crystals: 0, price: 147, is_free: false, bg_effect: 'neon', bg_color: '#3dbaff', amount_effect: 'neon', price_effect: 'pill' },
+      { id: 'p2', crystals: 130000, base_crystals: 100000, price: 980, is_free: false, badge: '+%30', bg_effect: 'aurora', amount_effect: 'rainbow', price_effect: 'gold' },
+      { id: 'p3', crystals: 400000, base_crystals: 300000, price: 2940, is_free: false, bg_effect: 'galaxy', amount_effect: 'ice', price_effect: 'stamp' },
+      { id: 'p4', crystals: 1500000, base_crystals: 1000000, price: 9800, is_free: false, badge: 'En popüler', bg_effect: 'gold', amount_effect: 'fire', price_effect: 'pulse' },
+      { id: 'p5', crystals: 3000000, base_crystals: 0, price: 19000, is_free: false, bg_effect: 'rainbow', amount_effect: 'shine', price_effect: 'neon' },
+      { id: 'p6', crystals: 6000000, base_crystals: 0, price: 35000, is_free: false, bg_effect: 'ice', amount_effect: 'outline', price_effect: 'ice' },
+      { id: 'p7', crystals: 9000000, base_crystals: 0, price: 50000, is_free: false, bg_effect: 'solid', bg_color: '#b0154a', amount_effect: 'pulse', price_effect: 'pill' },
+      { id: 'p8', crystals: 12000000, base_crystals: 0, price: 70000, is_free: false, bg_effect: 'glass', amount_effect: 'gold', price_effect: 'rainbow' }] };
   }
   if (name === 'web_crystal_lookup') return a.p_id === '1001' ? { retra_id: '1001', username: 'Reyhan', avatar_url: '' } : null;
   if (name === 'web_crystal_code_request') {
@@ -126,19 +130,32 @@ function renderPacks() {
   for (const p of state.packages) {
     const pct = bonusPct(p);
     const el = document.createElement('button');
-    el.className = `pack${p.is_free ? ' free' : ''}${pct ? ' bonus' : ''}${state.pack?.id === p.id ? ' sel' : ''}`;
+    const max = Number(p.max_claims) || 0;
+    const left = max > 0 ? Math.max(0, Number(p.left ?? max)) : null;
+    const out = left === 0;
+    el.className = `pack${p.is_free ? ' free' : ''}${pct ? ' bonus' : ''}${out ? ' out' : ''}${state.pack?.id === p.id ? ' sel' : ''}${p.bg_effect ? ` bg-${p.bg_effect}` : ''}`;
+    if (/^#[0-9a-f]{6}$/i.test(p.bg_color || '')) el.style.setProperty('--pc', p.bg_color);
+    // Stok: "Kalan 47/50" + doluluk çubuğu.
+    const stock = max > 0
+      ? `<span class="stock${out ? ' none' : left <= Math.max(3, max * 0.2) ? ' low' : ''}">
+           <span class="stock-t">${out ? 'Tükendi' : `Kalan <b>${fmt(left)}</b>/${fmt(max)}`}</span>
+           <i><u style="width:${Math.round((left / max) * 100)}%"></u></i>
+         </span>`
+      : '';
     const badge = p.badge || (p.is_free ? 'ÜCRETSİZ' : pct ? `+%${pct} BONUS` : '');
     el.innerHTML = `
       ${badge ? `<span class="tag">${String(badge).replace(/</g, '&lt;')}</span>` : ''}
+      <span class="fx"></span>
       <img src="./assets/kristal.png" alt="" />
       ${pct ? `<s class="old">${fmt(p.base_crystals)}</s>` : ''}
-      <span class="amt">${fmt(p.crystals)}<small>kristal</small></span>
+      <span class="amt${p.amount_effect ? ` fx-${p.amount_effect}` : ''}">${fmt(p.crystals)}<small>kristal</small></span>
       ${pct ? `<span class="up">▲ +${fmt(p.crystals - p.base_crystals)} bonus</span>` : ''}
-      <span class="price">${p.is_free ? 'Ücretsiz' : money(p.price)}</span>
-      ${p.is_free ? `<span class="lim">${p.free_limit === 'daily' ? 'Her gün 1 kez' : 'Hesap başına 1 kez'}</span>`
-                  : '<span class="lim soon">Kartla ödeme yakında</span>'}`;
+      <span class="price${p.price_effect ? ` fx-${p.price_effect}` : ''}">${p.is_free ? 'Ücretsiz' : money(p.price)}</span>
+      ${stock}
+      ${p.is_free ? '' : '<span class="lim soon">Kartla ödeme yakında</span>'}`;
     el.onclick = () => {
       if (state.busy) return;
+      if (out) { toast('Bu paketin stoğu bitti.'); return; }
       if (state.pack?.id !== p.id) resetCode();
       state.pack = p;
       renderPacks();
@@ -417,6 +434,34 @@ function showReceipt(r, p) {
   card.addEventListener('pointerleave', () => { card.style.transform = ''; });
 }
 
+const normalize = (list) => (list || []).map((p) => ({
+  ...p, crystals: Number(p.crystals), base_crystals: Number(p.base_crystals) || 0, price: Number(p.price),
+  max_claims: Number(p.max_claims) || 0, left: p.left == null ? null : Number(p.left),
+  bg_effect: safeKey(p.bg_effect), amount_effect: safeKey(p.amount_effect), price_effect: safeKey(p.price_effect),
+}));
+
+// Efekt adları yalnız harf (sunucu zaten izin listesiyle doğrular).
+const safeKey = (v) => (/^[a-z]{1,12}$/.test(String(v || '')) ? String(v) : '');
+
+// Admin'in paket / efekt değişiklikleri sayfayı yenilemeden yansısın.
+let lastPacks = '';
+async function refreshPackages() {
+  try {
+    const cfg = await rpc('web_crystal_public');
+    if (!cfg?.enabled) return;
+    const sig = JSON.stringify(cfg.packages || []);
+    if (sig === lastPacks) return;
+    lastPacks = sig;
+    state.packages = normalize(cfg.packages);
+    if (state.pack) {
+      const fresh = state.packages.find((x) => x.id === state.pack.id);
+      if (fresh) state.pack = fresh;
+    }
+    renderPacks();
+    renderPay();
+  } catch { /* sonraki turda tekrar */ }
+}
+
 // ─── Başlat ────────────────────────────────────────────────────────────────
 async function main() {
   $('rid').value = (params.get('id') || store.get('id')).replace(/[^\w-]/g, '');
@@ -430,9 +475,8 @@ async function main() {
   try {
     const cfg = await rpc('web_crystal_public');
     state.payments = cfg?.payments === true;
-    state.packages = (cfg?.packages || []).map((p) => ({
-      ...p, crystals: Number(p.crystals), base_crystals: Number(p.base_crystals) || 0, price: Number(p.price),
-    }));
+    lastPacks = JSON.stringify(cfg?.packages || []);
+    state.packages = normalize(cfg?.packages);
     if (!cfg?.enabled) {
       $('packs').innerHTML = '<div class="muted">Kristal merkezi şu an kapalı. Kısa süre sonra tekrar dene.</div>';
       state.packages = [];
@@ -444,6 +488,7 @@ async function main() {
   }
   if ($('rid').value) lookup();
   renderPay();
+  setInterval(() => { if (!document.hidden && !$('shop').hidden) refreshPackages(); }, 20000);
 }
 
 main();

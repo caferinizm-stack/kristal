@@ -172,3 +172,137 @@ body.done .pay-bar { display: none; }
 .link { background: none; padding: 8px 0; font-weight: 900; font-size: 12.5px; color: var(--gold); white-space: nowrap; }
 .link:disabled { color: var(--muted); opacity: .7; }
 .who-edit { background: none; color: var(--gold); font-weight: 900; font-size: 12px; padding: 4px 6px; }
+
+/* ─── Stok: "Kalan 47/50" ─────────────────────────────────────────────── */
+.pack .stock { width: 86%; display: flex; flex-direction: column; align-items: center; gap: 4px; margin-top: 2px; }
+.pack .stock-t { font-size: 11px; font-weight: 800; color: #d8d2f5; }
+.pack .stock-t b { color: #fff; font-weight: 900; }
+.pack .stock i { display: block; width: 100%; height: 5px; border-radius: 99px; background: rgba(255, 255, 255, .1); overflow: hidden; }
+.pack .stock u { display: block; height: 100%; border-radius: 99px; background: linear-gradient(90deg, #36e28b, #b18cff); box-shadow: 0 0 8px rgba(120, 255, 180, .5); }
+.pack .stock.low .stock-t { color: #ffb36b; }
+.pack .stock.low u { background: linear-gradient(90deg, #ff9f1c, #ff6b7f); }
+.pack .stock.none .stock-t { color: var(--red); font-weight: 900; }
+.pack.out { opacity: .5; filter: grayscale(.6); }
+
+/* ─── Paket efektleri (Admin ▸ Web Kristal ▸ paket ▸ Görünüm) ─────────── */
+.pack { isolation: isolate; overflow: visible; }
+.pack .fx { position: absolute; inset: 0; z-index: -1; border-radius: inherit; overflow: hidden; pointer-events: none; }
+.pack .fx::before, .pack .fx::after { content: ''; position: absolute; inset: 0; }
+/* Yazılar her arka planda okunsun: alt katman koyulaştırma + gölge. */
+.pack[class*="bg-"] .fx::after { background: radial-gradient(ellipse at 50% 55%, rgba(8, 5, 20, .55), rgba(8, 5, 20, .15) 75%); }
+.pack[class*="bg-"] .amt, .pack[class*="bg-"] .price, .pack[class*="bg-"] .stock-t, .pack[class*="bg-"] .up, .pack[class*="bg-"] .lim { text-shadow: 0 1px 3px rgba(0, 0, 0, .85); }
+
+/* Alevli */
+.pack.bg-fire { border-color: rgba(255, 120, 40, .8); box-shadow: 0 0 18px rgba(255, 90, 20, .35); }
+.pack.bg-fire .fx { background: linear-gradient(180deg, #1a0703, #3a0c02 60%, #6b1600); }
+.pack.bg-fire .fx::before {
+  inset: -40% -10% -10%;
+  background:
+    radial-gradient(40% 35% at 25% 100%, rgba(255, 200, 60, .95), transparent 70%),
+    radial-gradient(35% 45% at 55% 100%, rgba(255, 110, 20, .95), transparent 70%),
+    radial-gradient(30% 40% at 80% 100%, rgba(255, 60, 20, .9), transparent 70%),
+    radial-gradient(25% 30% at 40% 90%, rgba(255, 240, 150, .7), transparent 70%);
+  filter: blur(6px);
+  animation: flame 1.6s ease-in-out infinite alternate;
+  transform-origin: 50% 100%;
+}
+@keyframes flame {
+  0% { transform: translateY(6%) scaleY(.92) scaleX(1.02); opacity: .85; }
+  50% { transform: translateY(-2%) scaleY(1.08) scaleX(.97); opacity: 1; }
+  100% { transform: translateY(3%) scaleY(1) scaleX(1.04); opacity: .9; }
+}
+/* Aurora */
+.pack.bg-aurora { border-color: rgba(120, 255, 210, .6); }
+.pack.bg-aurora .fx { background: #071226; }
+.pack.bg-aurora .fx::before {
+  inset: -50%;
+  background: conic-gradient(from 0deg at 50% 50%, #00e0b0, #5b6cff, #c84bff, #00e0b0);
+  filter: blur(26px); opacity: .7;
+  animation: spin 9s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+/* Galaksi */
+.pack.bg-galaxy { border-color: rgba(170, 140, 255, .6); }
+.pack.bg-galaxy .fx { background: radial-gradient(120% 90% at 30% 20%, #3b1e7a, #120a2e 55%, #05030f); }
+.pack.bg-galaxy .fx::before {
+  background-image:
+    radial-gradient(1.5px 1.5px at 12% 20%, #fff, transparent), radial-gradient(1px 1px at 70% 30%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 40% 70%, #cfe9ff, transparent), radial-gradient(1px 1px at 85% 80%, #fff, transparent),
+    radial-gradient(1px 1px at 25% 85%, #fff, transparent), radial-gradient(2px 2px at 60% 55%, #ffe9b0, transparent),
+    radial-gradient(1px 1px at 90% 12%, #fff, transparent), radial-gradient(1.5px 1.5px at 5% 55%, #fff, transparent);
+  animation: twinkle 2.4s ease-in-out infinite alternate;
+}
+@keyframes twinkle { from { opacity: .35; } to { opacity: 1; } }
+/* Altın parıltı */
+.pack.bg-gold { border-color: #ffcf5a; box-shadow: 0 0 16px rgba(255, 207, 90, .35); }
+.pack.bg-gold .fx { background: linear-gradient(135deg, #3a2600, #6b4a00 45%, #2a1a00); }
+.pack.bg-gold .fx::before {
+  background: linear-gradient(110deg, transparent 30%, rgba(255, 236, 160, .55) 48%, transparent 66%);
+  transform: translateX(-100%);
+  animation: sweep 2.8s ease-in-out infinite;
+}
+@keyframes sweep { 60%, 100% { transform: translateX(100%); } }
+/* Neon çerçeve */
+.pack.bg-neon { border: 2px solid var(--pc, #ff3df2); animation: neonbox 1.8s ease-in-out infinite alternate; }
+.pack.bg-neon .fx { background: #0b0718; }
+.pack.bg-neon .fx::before { background: radial-gradient(80% 60% at 50% 0%, color-mix(in srgb, var(--pc, #ff3df2) 35%, transparent), transparent 70%); }
+@keyframes neonbox {
+  from { box-shadow: 0 0 6px var(--pc, #ff3df2), inset 0 0 6px color-mix(in srgb, var(--pc, #ff3df2) 50%, transparent); }
+  to { box-shadow: 0 0 20px var(--pc, #ff3df2), inset 0 0 14px color-mix(in srgb, var(--pc, #ff3df2) 60%, transparent); }
+}
+/* Buz */
+.pack.bg-ice { border-color: rgba(160, 230, 255, .8); }
+.pack.bg-ice .fx { background: linear-gradient(160deg, #0d3550, #0a1f35 55%, #06121f); }
+.pack.bg-ice .fx::before {
+  background:
+    linear-gradient(115deg, transparent 20%, rgba(200, 245, 255, .25) 35%, transparent 50%),
+    radial-gradient(60% 50% at 80% 10%, rgba(180, 240, 255, .35), transparent 70%);
+  animation: frost 4s ease-in-out infinite alternate;
+}
+@keyframes frost { from { opacity: .5; } to { opacity: 1; } }
+/* Gökkuşağı */
+.pack.bg-rainbow { border-color: transparent; }
+.pack.bg-rainbow .fx { background: #0d0920; }
+.pack.bg-rainbow .fx::before {
+  background: linear-gradient(120deg, #ff3d6e, #ffb13d, #f9f871, #3dffa2, #3dbaff, #9d5cff, #ff3d6e);
+  background-size: 300% 300%; opacity: .55;
+  animation: slide 5s linear infinite;
+}
+@keyframes slide { to { background-position: 300% 0; } }
+/* Düz renk */
+.pack.bg-solid { border-color: color-mix(in srgb, var(--pc, #8b5cff) 80%, #fff); }
+.pack.bg-solid .fx { background: var(--pc, #8b5cff); }
+/* Şeffaf cam */
+.pack.bg-glass { border-color: rgba(255, 255, 255, .35); }
+.pack.bg-glass .fx { background: color-mix(in srgb, var(--pc, #ffffff) 10%, transparent); backdrop-filter: blur(10px); }
+.pack.bg-glass .fx::after { background: linear-gradient(160deg, rgba(255, 255, 255, .18), transparent 45%); }
+
+/* ─── Kristal miktarı yazı efektleri ─────────────────────────────────── */
+.pack .amt.fx-gold, .pack .amt.fx-fire, .pack .amt.fx-rainbow, .pack .amt.fx-ice, .pack .amt.fx-shine,
+.pack .price.fx-gold, .pack .price.fx-fire, .pack .price.fx-rainbow, .pack .price.fx-ice {
+  -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent;
+  text-shadow: none !important; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .8));
+}
+.pack .fx-gold { background-image: linear-gradient(90deg, #fff3b0, #ffcf5a, #ff9f1c, #ffe9a0, #ffcf5a); background-size: 200% 100%; animation: textflow 2.4s linear infinite; }
+.pack .fx-fire { background-image: linear-gradient(0deg, #ff3d00, #ff8a00 40%, #ffe066 75%, #fff6c8); background-size: 100% 200%; animation: textfire 1s ease-in-out infinite alternate; }
+.pack .fx-rainbow { background-image: linear-gradient(90deg, #ff3d6e, #ffb13d, #f9f871, #3dffa2, #3dbaff, #c45cff, #ff3d6e); background-size: 300% 100%; animation: textflow 3s linear infinite; }
+.pack .fx-ice { background-image: linear-gradient(180deg, #ffffff, #b8f0ff 50%, #5ccfff); background-size: 100% 200%; animation: textfire 2s ease-in-out infinite alternate; }
+.pack .fx-shine { background-image: linear-gradient(100deg, #fff 40%, #ffe9a0 50%, #fff 60%); background-size: 250% 100%; animation: textflow 2.2s linear infinite; }
+@keyframes textflow { to { background-position: 200% 0; } }
+@keyframes textfire { from { background-position: 0 0; } to { background-position: 0 100%; } }
+.pack .fx-neon { color: #fff !important; text-shadow: 0 0 4px #fff, 0 0 10px var(--pc, #ff3df2), 0 0 20px var(--pc, #ff3df2) !important; animation: neonflick 2.6s infinite; }
+@keyframes neonflick { 0%, 92%, 96%, 100% { opacity: 1; } 94% { opacity: .55; } }
+.pack .fx-pulse { display: inline-block; animation: pulse 1.2s ease-in-out infinite; }
+@keyframes pulse { 50% { transform: scale(1.08); } }
+.pack .amt.fx-outline { color: transparent; -webkit-text-stroke: 1.2px #ffe08a; text-shadow: 0 0 10px rgba(255, 207, 90, .6) !important; }
+.pack .amt.fx-outline small { -webkit-text-stroke: 0; color: var(--muted); }
+.pack .amt[class*="fx-"] small { -webkit-text-fill-color: #d8d2f5; color: #d8d2f5; }
+
+/* ─── Fiyat efektleri ────────────────────────────────────────────────── */
+.pack .price.fx-pill { padding: 3px 12px; border-radius: 999px; color: #2a1700; background: linear-gradient(180deg, #ffe08a, #ff9f1c); box-shadow: 0 4px 12px rgba(255, 159, 28, .4); text-shadow: none !important; }
+.pack.free .price.fx-pill { color: #fff; background: linear-gradient(180deg, #b18cff, #6a3cff); box-shadow: 0 4px 12px rgba(139, 92, 255, .45); }
+.pack .price.fx-stamp { padding: 2px 10px; border: 2px dashed currentColor; border-radius: 8px; transform: rotate(-6deg); letter-spacing: .5px; text-transform: uppercase; font-size: 13px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .pack .fx::before, .pack [class*="fx-"], .pack.bg-neon { animation: none !important; }
+}
