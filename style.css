@@ -306,3 +306,19 @@ body.done .pay-bar { display: none; }
 @media (prefers-reduced-motion: reduce) {
   .pack .fx::before, .pack [class*="fx-"], .pack.bg-neon { animation: none !important; }
 }
+
+/* ─── Ödeme bekleniyor (Shopier) ─────────────────────────────────────── */
+.pay-wait { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 22px 16px; margin-top: 18px; border-color: rgba(255, 207, 90, .35); background: linear-gradient(180deg, rgba(255, 207, 90, .08), var(--card)); }
+.pw-orb { width: 86px; height: 86px; border-radius: 50%; display: grid; place-items: center; background: radial-gradient(circle, rgba(139, 92, 255, .45), transparent 70%); animation: float 3s ease-in-out infinite; }
+.pw-orb img { width: 54px; height: 60px; object-fit: contain; filter: drop-shadow(0 0 14px rgba(120, 200, 255, .8)); }
+.pw-title { font-size: 19px; font-weight: 900; }
+.pw-sum { font-size: 15px; font-weight: 900; color: var(--gold); }
+.pw-text { margin: 0; font-size: 13px; line-height: 1.5; color: var(--muted); }
+.pw-dots { display: flex; gap: 6px; margin: 2px 0 4px; }
+.pw-dots i { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); animation: pwDot 1.2s ease-in-out infinite; }
+.pw-dots i:nth-child(2) { animation-delay: .2s; } .pw-dots i:nth-child(3) { animation-delay: .4s; }
+@keyframes pwDot { 0%, 100% { opacity: .25; transform: scale(.8); } 50% { opacity: 1; transform: scale(1.15); } }
+.pw-open { display: block; text-decoration: none; text-align: center; }
+.pw-cancel { padding: 12px; }
+.pw-no { color: var(--muted); font-size: 11.5px; }
+.pack .lim.pay { color: #8fffc8; }

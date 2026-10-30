@@ -36,7 +36,9 @@ const ERR = {
   LOCKED: 'Çok fazla yanlış deneme. Yeni kod iste.',
   NO_VERIFY: 'Önce uygulamadaki kodu doğrula.',
   USED: 'Bu kod zaten kullanıldı.',
-  PAY_SOON: 'Kartla ödeme çok yakında.',
+  PAY_SOON: 'Kartla ödeme şu an kapalı.',
+  NOT_PAID: 'Bu paket ücretsiz, "Aktar" ile alabilirsin.',
+  SHOPIER: 'Ödeme sayfası açılamadı, biraz sonra tekrar dene.',
 };
 const errText = (t) => {
   const w = String(t).match(/WAIT:(\d+)/);
@@ -63,7 +65,7 @@ const demoCodes = {};
 async function demo(name, a) {
   await new Promise((r) => setTimeout(r, 300));
   if (name === 'web_crystal_public') {
-    return { enabled: true, payments: false, packages: [
+    return { enabled: true, payments: params.get('pay') === '1', packages: [
       { id: 'f1', crystals: 15000, base_crystals: 10000, price: 0, is_free: true, max_claims: 50, left: 47, badge: 'Hoş geldin', bg_effect: 'fire', amount_effect: 'gold', price_effect: 'fire' },
       { id: 'f2', crystals: 500, base_crystals: 0, price: 0, is_free: true, max_claims: 20, left: 0 },
       { id: 'p1', crystals: 15000, base_crystals: 0, price: 147, is_free: false, bg_effect: 'neon', bg_color: '#3dbaff', amount_effect: 'neon', price_effect: 'pill' },
@@ -96,6 +98,14 @@ async function demo(name, a) {
     if (!p.is_free) throw new Error('PAY_SOON');
     demoClaimed.add(p.id);
     return { ok: true, crystals: p.crystals, base_crystals: p.base_crystals, username: 'Reyhan', retra_id: '1001', receipt_no: 'RW-261030-A1B2C3' };
+  }
+  if (name === 'edge:shopier') {
+    return { ok: true, order_id: 'demo-order', url: 'https://www.shopier.com/demo', receipt_no: 'RS-261030-DEMO01' };
+  }
+  if (name === 'web_crystal_shopier_status') {
+    return Date.now() - (Number(a.at) || Date.now()) > 6000
+      ? { status: 'paid', crystals: a.crystals, base_crystals: a.base, price: a.price, receipt_no: a.no, username: 'Reyhan', retra_id: '1001' }
+      : { status: 'pending' };
   }
   return null;
 }
@@ -152,7 +162,7 @@ function renderPacks() {
       ${pct ? `<span class="up">▲ +${fmt(p.crystals - p.base_crystals)} bonus</span>` : ''}
       <span class="price${p.price_effect ? ` fx-${p.price_effect}` : ''}">${p.is_free ? 'Ücretsiz' : money(p.price)}</span>
       ${stock}
-      ${p.is_free ? '' : '<span class="lim soon">Kartla ödeme yakında</span>'}`;
+      ${p.is_free ? '' : state.payments ? '<span class="lim pay">💳 Kartla öde</span>' : '<span class="lim soon">Kartla ödeme yakında</span>'}`;
     el.onclick = () => {
       if (state.busy) return;
       if (out) { toast('Bu paketin stoğu bitti.'); return; }
@@ -208,7 +218,7 @@ function renderPay() {
     btn.disabled = otpValue().length !== 5 || busy;
     return;
   }
-  btn.textContent = p?.is_free ? (busy ? 'Aktarılıyor…' : 'Aktar') : 'Satın al';
+  btn.textContent = p?.is_free ? (busy ? 'Aktarılıyor…' : 'Aktar') : busy ? 'Ödeme açılıyor…' : '💳 Satın al';
   btn.disabled = busy;
 }
 
@@ -328,7 +338,7 @@ async function verifyCode() {
     $('code-ok').hidden = false;
     $('code-ok').textContent = '✓ Kod doğrulandı';
     hint.className = 'hint';
-    hint.textContent = state.pack?.is_free ? '"Aktar" ile kristal hesabına geçer.' : 'Kartla ödeme çok yakında açılacak.';
+    hint.textContent = state.pack?.is_free ? '"Aktar" ile kristal hesabına geçer.' : (state.payments ? '"Satın al" ile Shopier güvenli ödeme sayfası açılır.' : 'Kartla ödeme çok yakında açılacak.');
     tickResend();
   } catch (e) {
     hint.className = 'hint err';
@@ -343,8 +353,8 @@ async function transfer() {
   const p = state.pack;
   if (state.busy || !p || !state.verified) return;
   if (!p.is_free) {
-    toast('Kartla ödeme çok yakında. Şimdilik ücretsiz paketleri alabilirsin.');
-    return;
+    if (!state.payments) { toast('Kartla ödeme çok yakında. Şimdilik ücretsiz paketleri alabilirsin.'); return; }
+    return checkout(p);
   }
   state.busy = true;
   renderPay();
@@ -357,6 +367,88 @@ async function transfer() {
     state.busy = false;
     renderPay();
   }
+}
+
+// ─── Kartla ödeme (Shopier) ────────────────────────────────────────────────
+async function edge(name, body) {
+  if (DEMO) return demo(`edge:${name}`, body);
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/${name}`, {
+    method: 'POST',
+    headers: { apikey: ANON_KEY, Authorization: `Bearer ${ANON_KEY}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  const j = await res.json().catch(() => null);
+  if (!res.ok || !j) throw new Error(j?.error || `edge ${res.status}`);
+  return j;
+}
+
+async function checkout(p) {
+  if (state.busy) return;
+  state.busy = true;
+  renderPay();
+  // Açılır pencere engellenmesin: sekme dokunuş anında açılır, link sonra verilir.
+  let win = null;
+  try { win = DEMO ? null : window.open('', '_blank'); } catch { win = null; }
+  try {
+    const r = await edge('shopier', { action: 'checkout', request_id: state.request, token: state.token });
+    if (!r?.url || !/^https:\/\//.test(r.url) && !DEMO) throw new Error(r?.error || 'SHOPIER');
+    let opened = false;
+    if (win && !win.closed) { try { win.location.href = r.url; opened = true; } catch { opened = false; } }
+    startWaiting({ id: r.order_id, url: r.url, no: r.receipt_no || '', crystals: p.crystals, base: p.base_crystals, price: p.price, at: Date.now() }, opened);
+  } catch (e) {
+    try { win?.close(); } catch { /* yok */ }
+    toast(errText(e?.message));
+  } finally {
+    state.busy = false;
+    renderPay();
+  }
+}
+
+const WAIT_MS = 2 * 60 * 60 * 1000; // 2 saat sonra bekleme bırakılır
+function startWaiting(o, opened) {
+  store.set('pending', JSON.stringify(o));
+  $('shop').hidden = true;
+  $('paying').hidden = false;
+  document.body.classList.add('done');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  $('pw-sum').textContent = `${fmt(o.crystals)} kristal · ${money(o.price)}`;
+  $('pw-no').textContent = o.no ? `Sipariş no: ${o.no}` : '';
+  const link = $('pw-open');
+  link.href = o.url || '#';
+  link.textContent = opened ? '💳 Ödeme sayfasını tekrar aç' : '💳 Ödeme sayfasını aç';
+  $('pw-text').textContent = opened
+    ? 'Shopier güvenli ödeme sayfası yeni sekmede açıldı. Ödemeyi tamamladığın an kristalin otomatik yüklenecek ve dekontun burada açılacak.'
+    : 'Aşağıdaki düğmeyle Shopier güvenli ödeme sayfasını aç. Ödemeyi tamamladığın an kristalin otomatik yüklenecek ve dekontun burada açılacak.';
+  $('pw-cancel').onclick = () => { store.set('pending', ''); location.href = location.pathname + (DEMO ? '?demo=1' : ''); };
+  clearTimeout(startWaiting.t);
+  const poll = async () => {
+    if (Date.now() - o.at > WAIT_MS) { store.set('pending', ''); $('pw-text').textContent = 'Ödeme gelmedi. Ödeme yaptıysan birkaç dakika içinde kristalin yine yüklenecek; uygulamadaki Retra Payment Asistan mesajını kontrol et.'; return; }
+    try {
+      const st = DEMO ? await demo('web_crystal_shopier_status', o) : await rpc('web_crystal_shopier_status', { p_order: o.id });
+      if (st?.status === 'paid') {
+        store.set('pending', '');
+        $('paying').hidden = true;
+        showReceipt(st, { is_free: false, price: Number(st.price) || o.price, crystals: o.crystals });
+        return;
+      }
+      if (st?.status === 'failed') {
+        store.set('pending', '');
+        toast('Ödeme sayfası açılamadı, tekrar dene.');
+        setTimeout(() => { location.href = location.pathname; }, 1800);
+        return;
+      }
+    } catch { /* bağlantı: tekrar dene */ }
+    startWaiting.t = setTimeout(poll, document.hidden ? 6000 : 3000);
+  };
+  startWaiting.t = setTimeout(poll, 2500);
+}
+
+function resumeWaiting() {
+  try {
+    const o = JSON.parse(store.get('pending') || 'null');
+    if (o?.id && Date.now() - Number(o.at) < WAIT_MS) { startWaiting(o, true); return true; }
+  } catch { /* yok */ }
+  return false;
 }
 
 function onPay() {
@@ -449,7 +541,9 @@ async function refreshPackages() {
   try {
     const cfg = await rpc('web_crystal_public');
     if (!cfg?.enabled) return;
-    const sig = JSON.stringify(cfg.packages || []);
+    const pay = cfg.payments === true;
+    const sig = JSON.stringify(cfg.packages || []) + pay;
+    state.payments = pay;
     if (sig === lastPacks) return;
     lastPacks = sig;
     state.packages = normalize(cfg.packages);
@@ -475,7 +569,7 @@ async function main() {
   try {
     const cfg = await rpc('web_crystal_public');
     state.payments = cfg?.payments === true;
-    lastPacks = JSON.stringify(cfg?.packages || []);
+    lastPacks = JSON.stringify(cfg?.packages || []) + (cfg?.payments === true);
     state.packages = normalize(cfg?.packages);
     if (!cfg?.enabled) {
       $('packs').innerHTML = '<div class="muted">Kristal merkezi şu an kapalı. Kısa süre sonra tekrar dene.</div>';
@@ -486,6 +580,7 @@ async function main() {
   } catch {
     $('packs').innerHTML = '<div class="muted">Paketler yüklenemedi. Sayfayı yenile.</div>';
   }
+  if (resumeWaiting()) return;
   if ($('rid').value) lookup();
   renderPay();
   setInterval(() => { if (!document.hidden && !$('shop').hidden) refreshPackages(); }, 20000);

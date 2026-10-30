@@ -28,7 +28,7 @@
           <img src="./assets/kristal.png" alt="" class="hero-gem" />
           <div>
             <h1>Kristal Yükle</h1>
-            <p>ID'ni gir, paketini seç, uygulamana gelen 5 haneli kodla onayla. Ücretsiz paketler anında hesabına geçer; kartla ödeme çok yakında.</p>
+            <p>ID'ni gir, paketini seç, uygulamana gelen 5 haneli kodla onayla. Ücretsiz paketler anında, kartla alınan paketler ödeme biter bitmez hesabına geçer.</p>
           </div>
         </div>
 
@@ -75,6 +75,20 @@
         </div>
 
         <p class="foot">Kristal yalnız önizlemede gördüğün ve kodu onaylayan hesaba yüklenir. Kodu kimseyle paylaşma.<span id="company"></span></p>
+      </section>
+
+      <!-- Ödeme bekleniyor (Shopier sayfası yeni sekmede) -->
+      <section id="paying" hidden>
+        <div class="card pay-wait">
+          <div class="pw-orb"><img src="./assets/kristal.png" alt="" /></div>
+          <b class="pw-title">Ödeme bekleniyor</b>
+          <div class="pw-sum" id="pw-sum"></div>
+          <p class="pw-text" id="pw-text">Shopier güvenli ödeme sayfası açıldı. Ödemeyi tamamladığın an kristalin otomatik yüklenecek ve dekontun burada açılacak.</p>
+          <div class="pw-dots"><i></i><i></i><i></i></div>
+          <a class="primary wide pw-open" id="pw-open" target="_blank" rel="noopener">💳 Ödeme sayfasını aç</a>
+          <button class="ghost wide pw-cancel" id="pw-cancel">Vazgeç, pakete dön</button>
+          <small class="pw-no" id="pw-no"></small>
+        </div>
       </section>
 
       <!-- Sonuç: 3D dekont -->
