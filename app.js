@@ -298,6 +298,7 @@ async function requestCode() {
     const r = await rpc('web_crystal_code_request', { p_retra_id: state.user.retra_id, p_package: p.id });
     resetCode();
     state.request = r.request_id;
+    if (!p.is_free) warmShopier();
     state.resendAt = Date.now() + 60000;
     $('code-who').textContent = `${r.username || state.user.username} hesabına`;
     $('code-hint').className = 'hint';
@@ -380,6 +381,14 @@ async function edge(name, body) {
   const j = await res.json().catch(() => null);
   if (!res.ok || !j) throw new Error(j?.error || `edge ${res.status}`);
   return j;
+}
+
+// Hazır ödeme sayfalarını önceden hazırlat (Satın al'da Shopier anında açılır).
+let warmedAt = 0;
+function warmShopier() {
+  if (DEMO || !state.payments || Date.now() - warmedAt < 60000) return;
+  warmedAt = Date.now();
+  edge('shopier', { action: 'warm' }).catch(() => { /* önemli değil */ });
 }
 
 async function checkout(p) {
@@ -569,6 +578,7 @@ async function main() {
   try {
     const cfg = await rpc('web_crystal_public');
     state.payments = cfg?.payments === true;
+    warmShopier();
     lastPacks = JSON.stringify(cfg?.packages || []) + (cfg?.payments === true);
     state.packages = normalize(cfg?.packages);
     if (!cfg?.enabled) {
